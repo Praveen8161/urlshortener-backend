@@ -14,3 +14,8 @@ export async function getUserByToken(token){
 export function newUser(user){
   return new User(user).save() ;
 }
+
+// activate account
+export function getUserById(req){
+  return User.findById(req.params.token)
+}

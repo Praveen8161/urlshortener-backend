@@ -5,6 +5,7 @@ import { dbConnect } from './db.js';
 import { userRouter } from './Routers/user.js';
 import { forgotRouter } from './Routers/forgotPassword.js';
 import { resetRouter } from './Routers/resetPassword.js';
+import { shortURLRouter } from './Routers/shortURL.js';
 
 // config dotenv
 dotenv.config()
@@ -27,6 +28,8 @@ app.use('/signup' , userRouter);
 app.use('/login', userRouter);
 app.use('/forgot', forgotRouter);
 app.use('/reset', resetRouter);
+app.use('/shorturl', shortURLRouter);
+// app.use('/s')
 
 // listening the server
 app.listen(PORT, () => console.log(`server is running at http://localhost:${PORT}`))

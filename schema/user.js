@@ -22,10 +22,21 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    account: {
+        type: String,
+        required: true,
+        trim: true,
+        default: 'inactive'
+    },
     token: {
         type: String,
         trim: true
+    },
+    activationToken: {
+        type: String,
+        trim: true
     }
+
 })
 
 export const User = mongoose.model('User', userSchema);
