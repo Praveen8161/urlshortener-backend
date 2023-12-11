@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-    email: {
+    email : {
         type: String,
         required: true,
-        trim: true,
-        unique: true
+        unique: true,
+        trim: true
     },
     first_name: {
         type: String,
@@ -21,9 +21,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    token: {
+        type: String,
+        trim: true
     }
-});
+})
 
-const User = mongoose.model('User', userSchema);
-
-export { User };
+export const User = mongoose.model('User', userSchema);

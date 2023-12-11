@@ -1,15 +1,15 @@
 {
-  "name": "urlshortener-backend",
+  "name": "forget-password-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "engine": {
     "node": "18.18.2"
   },
+  "type": "module",
   "scripts": {
-    "start": "nodemon index.js",
     "dev": "node index.js",
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
