@@ -17,12 +17,12 @@ export async function sendActivationMail(email, actToken){
     let details = {
         from: process.env.EMAIL_NAME,
         to: email,
-        subject: 'Password Change Request ',
-        html: `<h5>Hi there,t</h5>
+        subject: 'Confirmation Email ',
+        html: `<h5>Hi there,</h5>
         <p>In order to complete your account creation click the link below to verify your email</p>
         <p>The link will be expired in 2 days</p>
         <div style="text-align: center;">
-          <a href="${backendURL}/${actToken}" target="_blank" style="background-color: #4CAF50; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 15px;">
+          <a href="${backendURL}/signup/activate/${actToken}" target="_blank" style="background-color: #4CAF50; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 15px;">
             Confirm Email
           </a>
         </div>`

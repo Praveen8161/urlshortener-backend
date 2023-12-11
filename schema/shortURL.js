@@ -24,6 +24,7 @@ const shortURLSchema =  new mongoose.Schema({
     },
     time: {
         type: Date,
+        required: true,
         default: Date.now,
     },
     user: {

@@ -1,14 +1,24 @@
 import express from 'express';
-import { addURL } from '../controller/shortURL.js';
+import { addURL, getShortUrl } from '../controller/shortURL.js';
+import { getUserSessionToken } from '../controller/user.js';
+import { verifyToken } from '../Auth/auth.js';
 
 const router = express.Router();
 
 // create a Short URL
 router.post('/create', async (req, res) => {
     try{
+        // get user by session token
+        const validUser = await getUserSessionToken(req.body.sessionToken);
+        if(!validUser) return res.status(404).json({error: 'user not found', acknowledged: false});
 
-        const newURL = await addURL(req);
-        if(!newURL) res.status(400).json({
+        // verifing token
+        const verifiedToken = verifyToken(validUser.sessionToken);
+        if(!verifiedToken) res.status(400).json({error: 'Session expired login again', acknowledged: false})
+
+        // creating new URL Short link
+        const newURL = await addURL(req.body.fullURL, validUser._id);
+        if(!newURL) return res.status(400).json({
             message: 'Error while updating data' ,
             acknowledged: false
         });
@@ -23,10 +33,17 @@ router.post('/create', async (req, res) => {
     }
 })
 
+// Redirect to original URL
 router.get('/:shorturl', async (req, res) => {
     try{
-
+        // get data using ShortURL
+        const URL = await getShortUrl(req);
+        if(!URL) return res.status(404).json({
+            message: 'URL does not exist' ,
+            acknowledged: false
+        });
         
+        res.redirect(URL.fullURL);
 
     }catch(err){
         res.status(500).json({
@@ -36,5 +53,7 @@ router.get('/:shorturl', async (req, res) => {
         });
     }
 });
+
+// 
 
 export const shortURLRouter = router;

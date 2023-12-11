@@ -1,20 +1,25 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { getUser, getUserById, newUser } from '../controller/user.js';
-import { genearateActiveToken } from '../Auth/auth.js';
+import { getUser, getUserBytoken, newUser } from '../controller/user.js';
+import { genearateActiveToken, genearateSessionToken, genearateToken } from '../Auth/auth.js';
 import { sendActivationMail } from '../helpers/activationMail.js';
 
 const router = express.Router();
 
 // to send activation email
-async function activationMail(email, id){
-    const actToken = genearateActiveToken(id);
+async function activationMail(email){
+    const actToken = genearateActiveToken(email);
 
     const activeMail = await sendActivationMail(email, actToken);
-    // console.log(sentedMail);
-    if(!activeMail)  return false;
 
-    return true;
+    if(!activeMail)  return {
+        acknowledged: false
+    };
+
+    return {
+        acknowledged: true,
+        actToken
+    };
 }
 
 // singup
@@ -34,13 +39,16 @@ router.post('/newuser', async (req, res) => {
             password: hashedPassword
         }
 
-        const savedUser = await newUser(user);
-
         // Send activation mail
-        const actMailSent = await activationMail(savedUser.email, savedUser._id);
-        if(!actMailSent) return res.status(400).json({error: 'error sending confirmation mail', acknowledged: false});
+        const actMailSent = await activationMail(user.email);
+        if(!actMailSent.acknowledged) return res.status(400).json({error: 'error sending confirmation mail Please check the mail address', acknowledged: false});
 
-        res.status(201).json({message: 'Successfully Registered', data: savedUser, email: 'Confirmation email is send to your email Address'});
+        // save the new user after confirmation email
+        const savedUser = await newUser(user);
+        savedUser.activationToken = actMailSent.actToken ;
+        await savedUser.save();
+
+        res.status(201).json({message: 'Successfully Registered', id: savedUser._id, email: 'Confirmation email is send to your email Address'});
 
     }catch(err){
         res.status(500).json({error: 'Internal Server Error', message:err});
@@ -51,12 +59,12 @@ router.post('/newuser', async (req, res) => {
 router.get('/resend', async (req, res) => {
     try{
         // check user
-        const checkUser = await getUserById(req);
+        const checkUser = await getUserBytoken(req);
         if(!checkUser) return res.status(400).json({error: 'user not found'});
 
         // Send activation mail
-        const actMailSent = await activationMail(checkUser.email, checkUser._id);
-        if(!actMailSent) return res.status(400).json({error: 'error sending confirmation mail', acknowledged: false});
+        const actMailSent = await activationMail(checkUser.email);
+        if(!actMailSent) return res.status(400).json({error: 'error sending confirmation mail Please check the mail address', acknowledged: false});
 
         res.status(201).json({message: 'Confirmation email is send to your email Address' , acknowledged: true});
 
@@ -69,12 +77,14 @@ router.get('/resend', async (req, res) => {
 router.get('/activate/:token', async (req, res) => {
     try{
         // user exist
-        const user = await getUserById(req);
+        const user = await getUserBytoken(req);
+        console.log(user);
         if(!user) return res.status(404).json({error: 'user not found'});
         if(user.account === 'active') return res.status(400).send('Your account is activated already');
 
         // change account status to active
-        user.account = 'active'
+        user.account = 'active' ;
+        user.activationToken = '' ;
         await user.save();
 
         res.status(201).send('Your account has been activated');
@@ -96,7 +106,14 @@ router.post('/user', async (req, res) => {
 
         if(!validPassword) return res.status(404).json({error: 'Incorrect password'});
 
-        res.status(200).json({data: 'logged in successfully'})
+        // generate session token
+        const sesToken = genearateSessionToken(user._id);
+        if(!sesToken) res.status(404).json({error: 'user not found'});
+
+        user.sessionToken = sesToken ;
+        await user.save();
+
+        res.status(200).json({data: 'logged in successfully' , sessionToken: sesToken})
 
     }catch(err){
         res.status(500).json({error: 'Internal Server Error', message:err});

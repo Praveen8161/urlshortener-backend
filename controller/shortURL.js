@@ -1,7 +1,14 @@
 import { ShortURL } from "../schema/shortURL.js";
 
-export function addURL(req){
+// add new ShortURL
+export function addURL(fullURL, id){
     return new ShortURL({
-        ...req.body
+        fullURL,
+        user: id
     }).save();
+}
+
+// get data using ShortURL
+export function getShortUrl(req){
+    return ShortURL.findOne({shortURL: req.params.shorturl});
 }

@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    sessionToken: {
+        type: String,
+        trim: true
+    },
     activationToken: {
         type: String,
         trim: true

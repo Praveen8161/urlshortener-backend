@@ -16,6 +16,11 @@ export function newUser(user){
 }
 
 // activate account
-export function getUserById(req){
-  return User.findById(req.params.token)
+export function getUserBytoken(req){
+  return User.findOne({activationToken: req.params.token})
+}
+
+// validate User by session token
+export function getUserSessionToken(sessionToken){
+  return User.findOne({sessionToken: sessionToken})
 }
