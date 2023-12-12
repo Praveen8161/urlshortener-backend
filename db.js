@@ -10,7 +10,7 @@ const mongoURL = process.env.MONGO_URL ;
 
 export function dbConnect(){
     try{
-        mongoose.connect(localURL);
+        mongoose.connect(mongoURL);
         console.log('Data base connected');
 
     }catch(err){
