@@ -1,2 +1,2 @@
 // backend URL
-export const backendURL = 'http://localhost:9000' ;
+export const backendURL = 'https://urlshortener-mhsq.onrender.com' ;
