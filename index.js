@@ -29,7 +29,7 @@ app.use('/login', userRouter);
 app.use('/forgot', forgotRouter);
 app.use('/reset', resetRouter);
 app.use('/shorturl', shortURLRouter);
-// app.use('/s')
+app.use('/s', shortURLRouter)
 
 // listening the server
 app.listen(PORT, () => console.log(`server is running at http://localhost:${PORT}`))

@@ -12,3 +12,8 @@ export function addURL(fullURL, id){
 export function getShortUrl(req){
     return ShortURL.findOne({shortURL: req.params.shorturl});
 }
+
+// get all shorturl for one user
+export function getAllShortUrl(id){
+    return ShortURL.find({user: id});
+}

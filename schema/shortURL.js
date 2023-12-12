@@ -15,7 +15,7 @@ const shortURLSchema =  new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        default: randomStr.rnd()
+        default: () => randomStr.rnd()
     },
     count: {
         type: Number,

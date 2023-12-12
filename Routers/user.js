@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { getUser, getUserBytoken, newUser } from '../controller/user.js';
+import { getUser, getUserBytoken, newUser, getUserSessionToken } from '../controller/user.js';
 import { genearateActiveToken, genearateSessionToken, genearateToken } from '../Auth/auth.js';
 import { sendActivationMail } from '../helpers/activationMail.js';
 
@@ -56,17 +56,20 @@ router.post('/newuser', async (req, res) => {
 })
 
 // Resend Activation email
-router.get('/resend', async (req, res) => {
+router.post('/resend', async (req, res) => {
     try{
         // check user
-        const checkUser = await getUserBytoken(req);
-        if(!checkUser) return res.status(400).json({error: 'user not found'});
+        const checkUser = await getUserSessionToken(req.body.sessionToken);
+        if(!checkUser) return res.status(400).json({error: 'user not found', acknowledged: false});
 
         // Send activation mail
         const actMailSent = await activationMail(checkUser.email);
-        if(!actMailSent) return res.status(400).json({error: 'error sending confirmation mail Please check the mail address', acknowledged: false});
+        if(!actMailSent.acknowledged) return res.status(400).json({error: 'error sending confirmation mail Please check the mail address', acknowledged: false});
 
-        res.status(201).json({message: 'Confirmation email is send to your email Address' , acknowledged: true});
+        checkUser.activationToken = actMailSent.actToken ;
+        await checkUser.save();
+
+        res.status(201).json({message: 'verification email is send to your email Address' , acknowledged: true});
 
     }catch(err){
         res.status(500).json({error: 'Internal Server Error', message:err});

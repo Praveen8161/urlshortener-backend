@@ -1,5 +1,5 @@
 import express from 'express';
-import { addURL, getShortUrl } from '../controller/shortURL.js';
+import { addURL, getShortUrl, getAllShortUrl } from '../controller/shortURL.js';
 import { getUserSessionToken } from '../controller/user.js';
 import { verifyToken } from '../Auth/auth.js';
 
@@ -11,6 +11,7 @@ router.post('/create', async (req, res) => {
         // get user by session token
         const validUser = await getUserSessionToken(req.body.sessionToken);
         if(!validUser) return res.status(404).json({error: 'user not found', acknowledged: false});
+        if(validUser.account === 'inactive') return res.status(404).json({error: 'account not verified', acknowledged: false, inactive: true});
 
         // verifing token
         const verifiedToken = verifyToken(validUser.sessionToken);
@@ -22,7 +23,29 @@ router.post('/create', async (req, res) => {
             message: 'Error while updating data' ,
             acknowledged: false
         });
-        res.status(201).json({message: 'Short URL created', acknowledged: true});
+        res.status(201).json({message: 'Short URL created', acknowledged: true, newURL});
+
+    }catch(err){
+        res.status(500).json({
+            message: 'Internal server error',
+            acknowledged: false,
+            error: err
+        });
+    }
+})
+
+// get all short URL
+router.post('/all', async (req, res) => {
+    try{
+        // get user by session token
+        const validUser = await getUserSessionToken(req.body.sessionToken);
+        if(!validUser) return res.status(404).json({error: 'user not found', acknowledged: false});
+
+        if(validUser.account === 'inactive') return res.status(404).json({error: 'account not verified', acknowledged: false, inactive: true});
+
+        const allShortUrl = await getAllShortUrl(validUser._id);
+
+        res.status(201).json({data: allShortUrl , acknowledged: true});
 
     }catch(err){
         res.status(500).json({
@@ -42,6 +65,9 @@ router.get('/:shorturl', async (req, res) => {
             message: 'URL does not exist' ,
             acknowledged: false
         });
+        // Update the count
+        URL.count++;
+        await URL.save();
         
         res.redirect(URL.fullURL);
 

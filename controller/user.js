@@ -15,7 +15,7 @@ export function newUser(user){
   return new User(user).save() ;
 }
 
-// activate account
+// activate account by activation token
 export function getUserBytoken(req){
   return User.findOne({activationToken: req.params.token})
 }
