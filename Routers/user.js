@@ -55,11 +55,33 @@ router.post('/newuser', async (req, res) => {
     }
 })
 
-// Resend Activation email
+// Resend Activation email by session token
 router.post('/resend', async (req, res) => {
     try{
         // check user
         const checkUser = await getUserSessionToken(req.body.sessionToken);
+        if(!checkUser) return res.status(400).json({error: 'user not found', acknowledged: false});
+
+        // Send activation mail
+        const actMailSent = await activationMail(checkUser.email);
+        if(!actMailSent.acknowledged) return res.status(400).json({error: 'error sending confirmation mail Please check the mail address', acknowledged: false});
+
+        checkUser.activationToken = actMailSent.actToken ;
+        await checkUser.save();
+
+        res.status(201).json({message: 'verification email is send to your email Address' , acknowledged: true});
+
+    }catch(err){
+        res.status(500).json({error: 'Internal Server Error', message:err});
+    }
+})
+
+// Resend Activation email by email
+router.post('/resendemail', async (req, res) => {
+    try{
+        // check user
+        const checkUser = await getUser(req);
+        console.log(checkUser);
         if(!checkUser) return res.status(400).json({error: 'user not found', acknowledged: false});
 
         // Send activation mail
@@ -108,6 +130,7 @@ router.post('/user', async (req, res) => {
         const validPassword = await bcrypt.compare( req.body.password, user.password );
 
         if(!validPassword) return res.status(404).json({error: 'Incorrect password'});
+        if(user.account === 'inactive') return res.status(404).json({error: 'verification not completed, verify your account to login' , active:true});
 
         // generate session token
         const sesToken = genearateSessionToken(user._id);
