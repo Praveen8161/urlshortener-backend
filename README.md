@@ -11,6 +11,7 @@
 - Update the Short URL Count everytime the short url is clicked
 
 **Base URL**
+
 URL - https://urlshortener-mhsq.onrender.com/
 
 ### POST
