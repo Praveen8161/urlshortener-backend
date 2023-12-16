@@ -67,7 +67,7 @@ When the User click the password reset email it will check the data and allow th
 }
 
 ## Front End Live Site
-- [Live Site](https://serene-douhua-9e2d21.netlify.app/)
+- [Live Site](url-shortener-8161.netlify.app/)
 
 ## Live Site
 - [Live Site](https://urlshortener-mhsq.onrender.com/)
